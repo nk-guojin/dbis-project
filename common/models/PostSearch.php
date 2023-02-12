@@ -22,7 +22,7 @@ class PostSearch extends Post
     {
         return [
             [['id', 'status', 'create_time', 'update_time', 'author_id'], 'integer'],
-            [['title', 'content', 'tags'], 'safe'],
+            [['title', 'content', 'tags','authorName'], 'safe'],
         ];
     }
 
@@ -47,6 +47,7 @@ class PostSearch extends Post
         $query = Post::find();
 
         // add conditions that should always apply here
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         	'pagination' => ['pageSize'=>10],
@@ -57,15 +58,27 @@ class PostSearch extends Post
         			//'attributes'=>['id','title'],
         	],
         ]);
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
 
+//         echo "<pre>";
+//         print_r($dataProvider->getPagination());
+        
+//         echo "<hr>";
+//         print_r($dataProvider->getSort());
+//         echo "<hr>";
+//         print_r($dataProvider->getCount());
+//         echo "<hr>";
+//         print_r($dataProvider->getTotalCount());
+        
+//         echo "</pre>";
+//         exit(0);
+        
+        
+        
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+             //$query->where('0=1');
             return $dataProvider;
         }
 
@@ -91,7 +104,10 @@ class PostSearch extends Post
         	'asc'=>['Adminuser.nickname'=>SORT_ASC],
         	'desc'=>['Adminuser.nickname'=>SORT_DESC],
         ];
-
+        
+        
+        
+        
         return $dataProvider;
     }
 }

@@ -8,14 +8,14 @@ use yii\helpers\Html;
 /**
  * This is the model class for table "post".
  *
- * @property integer $id
+ * @property int $id
  * @property string $title
  * @property string $content
- * @property string $tags
- * @property integer $status
- * @property integer $create_time
- * @property integer $update_time
- * @property integer $author_id
+ * @property string|null $tags
+ * @property int $status
+ * @property int|null $create_time
+ * @property int|null $update_time
+ * @property int $author_id
  *
  * @property Comment[] $comments
  * @property Adminuser $author
@@ -23,18 +23,23 @@ use yii\helpers\Html;
  */
 class Post extends \yii\db\ActiveRecord
 {
-	private $_oldTags;
-	
+    private $_oldTags;
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
         return 'post';
     }
-
     /**
-     * @inheritdoc
+       * @inheritdoc$primaryKey
+       */
+    public static function primaryKey()
+    {
+        return ['id'];
+    }
+    /**
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -49,23 +54,25 @@ class Post extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
             'id' => 'ID',
-            'title' => '标题',
-            'content' => '内容',
-            'tags' => '标签',
-            'status' => '状态',
-            'create_time' => '创建时间',
-            'update_time' => '修改时间',
-            'author_id' => '作者',
+            'title' => 'Title',
+            'content' => 'Content',
+            'tags' => 'Tags',
+            'status' => 'Status',
+            'create_time' => 'Create Time',
+            'update_time' => 'Update Time',
+            'author_id' => 'Author ID',
         ];
     }
 
     /**
+     * Gets query for [[Comments]].
+     *
      * @return \yii\db\ActiveQuery
      */
     public function getComments()
@@ -73,13 +80,9 @@ class Post extends \yii\db\ActiveRecord
         return $this->hasMany(Comment::className(), ['post_id' => 'id']);
     }
 
-    public function getActiveComments()
-    {
-    	return $this->hasMany(Comment::className(), ['post_id' => 'id'])
-    	->where('status=:status',[':status'=>2])->orderBy('id DESC');
-    }
-    
     /**
+     * Gets query for [[Author]].
+     *
      * @return \yii\db\ActiveQuery
      */
     public function getAuthor()
@@ -88,13 +91,16 @@ class Post extends \yii\db\ActiveRecord
     }
 
     /**
+     * Gets query for [[Status0]].
+     *
      * @return \yii\db\ActiveQuery
      */
     public function getStatus0()
     {
         return $this->hasOne(Poststatus::className(), ['id' => 'status']);
     }
-    
+
+
     public function beforeSave($insert)
     {
     	if(parent::beforeSave($insert))
@@ -166,8 +172,4 @@ class Post extends \yii\db\ActiveRecord
     	return Comment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
     }
 
-    public static function primaryKey()
-    {
-        return ['id'];
-    }
 }

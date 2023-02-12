@@ -15,14 +15,16 @@ class NewsSearch extends News
 	{
 		return array_merge(parent::attributes(),['authorName']);
 	}
+
     /**
      * {@inheritdoc}
      */
+    
     public function rules()
     {
         return [
             [['id', 'status', 'create_time', 'update_time', 'author_id'], 'integer'],
-            [['title', 'content', 'tags'], 'safe'],
+            [['title', 'content', 'tags','authorName'], 'safe'],
         ];
     }
 
@@ -47,6 +49,7 @@ class NewsSearch extends News
         $query = News::find();
 
         // add conditions that should always apply here
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         	'pagination' => ['pageSize'=>10],
@@ -54,33 +57,32 @@ class NewsSearch extends News
         			'defaultOrder'=>[
         					'id'=>SORT_DESC,        			
         			],
+        			//'attributes'=>['id','title'],
         	],
         ]);
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
+//         echo "<pre>";
+//         print_r($dataProvider->getPagination());
+        
+//         echo "<hr>";
+//         print_r($dataProvider->getSort());
+//         echo "<hr>";
+//         print_r($dataProvider->getCount());
+//         echo "<hr>";
+//         print_r($dataProvider->getTotalCount());
+        
+//         echo "</pre>";
+//         exit(0);
+        
+        
+        
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+             //$query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        /*$query->andFilterWhere([
-            'id' => $this->id,
-            'status' => $this->status,
-            'create_time' => $this->create_time,
-            'update_time' => $this->update_time,
-            'author_id' => $this->author_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'title', $this->title])
-            ->andFilterWhere(['like', 'content', $this->content])
-            ->andFilterWhere(['like', 'tags', $this->tags]);*/
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -104,7 +106,12 @@ class NewsSearch extends News
         	'asc'=>['Adminuser.nickname'=>SORT_ASC],
         	'desc'=>['Adminuser.nickname'=>SORT_DESC],
         ];
-
+        
+        
+        
+        
         return $dataProvider;
     }
+
+    
 }

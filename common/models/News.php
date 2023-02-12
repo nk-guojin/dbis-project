@@ -24,7 +24,6 @@ use yii\helpers\Html;
 class News extends \yii\db\ActiveRecord
 {
     private $_oldTags;
-
     /**
      * {@inheritdoc}
      */
@@ -32,7 +31,10 @@ class News extends \yii\db\ActiveRecord
     {
         return 'news';
     }
-
+    public static function primaryKey()
+    {
+        return ['id'];
+    }
     /**
      * {@inheritdoc}
      */
@@ -54,17 +56,26 @@ class News extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => '新闻ID',
-            'title' => '标题',
-            'content' => '内容',
-            'tags' => '标签',
-            'status' => '状态',
-            'create_time' => '创建时间',
-            'update_time' => '更新时间',
-            'author_id' => '作者',
+            'id' => 'ID',
+            'title' => 'Title',
+            'content' => 'Content',
+            'tags' => 'Tags',
+            'status' => 'Status',
+            'create_time' => 'Create Time',
+            'update_time' => 'Update Time',
+            'author_id' => 'Author ID',
         ];
     }
 
+    /**
+     * Gets query for [[Newscomments]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNewscomments()
+    {
+        return $this->hasMany(Newscomment::className(), ['news_id' => 'id']);
+    }
     /**
      * Gets query for [[Author]].
      *
@@ -85,21 +96,6 @@ class News extends \yii\db\ActiveRecord
         return $this->hasOne(Newsstatus::className(), ['id' => 'status']);
     }
 
-    /**
-     * Gets query for [[Newscomments]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getNewscomments()
-    {
-        return $this->hasMany(Newscomment::className(), ['post_id' => 'id']);
-    }
-
-    public function getActiveComments()
-    {
-    	return $this->hasMany(Newscomment::className(), ['post_id' => 'id'])
-    	->where('status=:status',[':status'=>2])->orderBy('id DESC');
-    }
     
     public function beforeSave($insert)
     {
@@ -167,18 +163,8 @@ class News extends \yii\db\ActiveRecord
     	return $links;
     }
 
-    public function getCommentCount()
-    {
-    	return Newscomment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
-    }
-
     public function getNewsCommentCount()
     {
-    	return Newscomment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
-    }
-
-    public static function primaryKey()
-    {
-        return ['id'];
+    	return Newscomment::find()->where(['news_id'=>$this->id,'status'=>2])->count();
     }
 }
