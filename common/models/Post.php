@@ -1,20 +1,28 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2011431
+ * This is the post of common model
+ */
+
 namespace common\models;
 
 use Yii;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "post".
  *
- * @property int $id
+ * @property integer $id
  * @property string $title
  * @property string $content
- * @property string|null $tags
- * @property int $status
- * @property int|null $create_time
- * @property int|null $update_time
- * @property int $author_id
+ * @property string $tags
+ * @property integer $status
+ * @property integer $create_time
+ * @property integer $update_time
+ * @property integer $author_id
  *
  * @property Comment[] $comments
  * @property Adminuser $author
@@ -22,8 +30,10 @@ use Yii;
  */
 class Post extends \yii\db\ActiveRecord
 {
+	private $_oldTags;
+	
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function tableName()
     {
@@ -31,7 +41,7 @@ class Post extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function rules()
     {
@@ -46,25 +56,23 @@ class Post extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function attributeLabels()
     {
         return [
             'id' => 'ID',
-            'title' => 'Title',
-            'content' => 'Content',
-            'tags' => 'Tags',
-            'status' => 'Status',
-            'create_time' => 'Create Time',
-            'update_time' => 'Update Time',
-            'author_id' => 'Author ID',
+            'title' => '标题',
+            'content' => '内容',
+            'tags' => '标签',
+            'status' => '状态',
+            'create_time' => '创建时间',
+            'update_time' => '修改时间',
+            'author_id' => '作者',
         ];
     }
 
     /**
-     * Gets query for [[Comments]].
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getComments()
@@ -72,9 +80,13 @@ class Post extends \yii\db\ActiveRecord
         return $this->hasMany(Comment::className(), ['post_id' => 'id']);
     }
 
+    public function getActiveComments()
+    {
+    	return $this->hasMany(Comment::className(), ['post_id' => 'id'])
+    	->where('status=:status',[':status'=>2])->orderBy('id DESC');
+    }
+    
     /**
-     * Gets query for [[Author]].
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getAuthor()
@@ -83,12 +95,86 @@ class Post extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Status0]].
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getStatus0()
     {
         return $this->hasOne(Poststatus::className(), ['id' => 'status']);
+    }
+    
+    public function beforeSave($insert)
+    {
+    	if(parent::beforeSave($insert))
+    	{
+    		if($insert)
+    		{
+    			$this->create_time = time();
+    			$this->update_time = time();
+    		}
+    		else 
+    		{
+    			$this->update_time = time();
+    		}
+    		
+    		return true;
+    			
+    	}
+    	else 
+    	{
+    		return false;
+    	}
+    } 
+    
+    public function afterFind()
+    {
+    	parent::afterFind();
+    	$this->_oldTags = $this->tags;
+    }
+    
+    public function afterSave($insert, $changedAttributes)
+    {
+    	parent::afterSave($insert, $changedAttributes);
+    	Tag::updateFrequency($this->_oldTags, $this->tags);
+    }
+    
+    public function afterDelete()
+    {
+    	parent::afterDelete();
+    	Tag::updateFrequency($this->tags, '');
+    }
+    
+    public function getUrl()
+    {
+    	return Yii::$app->urlManager->createUrl(
+    			['post/detail','id'=>$this->id,'title'=>$this->title]);
+    }
+    
+    public function getBeginning($length=288)
+    {
+    	$tmpStr = strip_tags($this->content);
+    	$tmpLen = mb_strlen($tmpStr);
+    	 
+    	$tmpStr = mb_substr($tmpStr,0,$length,'utf-8');
+    	return $tmpStr.($tmpLen>$length?'...':'');
+    }
+    
+    public function  getTagLinks()
+    {
+    	$links=array();
+    	foreach(Tag::string2array($this->tags) as $tag)
+    	{
+    		$links[]=Html::a(Html::encode($tag),array('post/index','PostSearch[tags]'=>$tag));
+    	}
+    	return $links;
+    }
+
+    public function getCommentCount()
+    {
+    	return Comment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
+    }
+
+    public static function primaryKey()
+    {
+        return ['id'];
     }
 }

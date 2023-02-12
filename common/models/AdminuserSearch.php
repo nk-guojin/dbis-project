@@ -1,29 +1,37 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2013922
+ * This is the adminusersearch of common model
+ */
+
 namespace common\models;
 
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Adminuser;
 
 /**
- * AdminuserSearch represents the model behind the search form of `common\models\Adminuser`.
+ * AdminuserSearch represents the model behind the search form about `common\models\Adminuser`.
  */
 class AdminuserSearch extends Adminuser
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function rules()
     {
         return [
             [['id'], 'integer'],
-            [['username', 'nickname', 'password', 'email', 'profile'], 'safe'],
+            [['username', 'nickname', 'password', 'email'], 'safe'],
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function scenarios()
     {
@@ -56,7 +64,7 @@ class AdminuserSearch extends Adminuser
             return $dataProvider;
         }
 
-        // grid filtering conditions
+        // grid filtering conditionss
         $query->andFilterWhere([
             'id' => $this->id,
         ]);
@@ -64,8 +72,11 @@ class AdminuserSearch extends Adminuser
         $query->andFilterWhere(['like', 'username', $this->username])
             ->andFilterWhere(['like', 'nickname', $this->nickname])
             ->andFilterWhere(['like', 'password', $this->password])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'profile', $this->profile]);
+            ->andFilterWhere(['like', 'email', $this->email]);
+            //->andFilterWhere(['like', 'profile', $this->profile])
+            //->andFilterWhere(['like', 'auth_key', $this->auth_key])
+            //->andFilterWhere(['like', 'password_hash', $this->password_hash])
+            //->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token]);
 
         return $dataProvider;
     }

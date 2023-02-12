@@ -1,5 +1,12 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2012516
+ * This is the main of backend layouts
+ */
+
 /* @var $this \yii\web\View */
 /* @var $content string */
 
@@ -29,12 +36,36 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => '互联网数据库',
+        'brandLabel' => '“小组”小组互联网数据库',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
+    if (!Yii::$app->user->isGuest){
+        $menuItems = [
+            ['label' => '首页', 'url' => ['/site/index']],
+            ['label' => '博客', 'url' => ['/post/index']],
+            ['label' => '博客评论', 'url' => ['/comment/index']],
+            ['label' => '新闻', 'url' => ['/news/index']],
+            ['label' => '新闻评论', 'url' => ['/newscomment/index']],
+            ['label' => '用户', 'url' => ['/user/index']],
+            ['label' => '管理员', 'url' => ['/adminuser/index']],
+        ];
+    }
+    else
+    {
+        $menuItems = [
+            ['label' => '首页', 'url' => ['/site/index']],
+            ['label' => '博客', 'url' => ['/site/index']],
+            ['label' => '博客评论', 'url' => ['/site/index']],
+            ['label' => '新闻', 'url' => ['/site/index']],
+            ['label' => '新闻评论', 'url' => ['/site/index']],
+            ['label' => '用户', 'url' => ['/site/index']],
+            ['label' => '管理员', 'url' => ['/site/index']],
+        ];
+    }
+    /*
     $menuItems = [
         ['label' => '首页', 'url' => ['/site/index']],
             ['label' => '博客', 'url' => ['/post/index']],
@@ -43,7 +74,7 @@ AppAsset::register($this);
             ['label' => '新闻评论', 'url' => ['/newscomment/index']],
             ['label' => '用户', 'url' => ['/user/index']],
             ['label' => '管理员', 'url' => ['/adminuser/index']],
-    ];
+    ];*/
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => '登录', 'url' => ['/site/login']];
     } else {

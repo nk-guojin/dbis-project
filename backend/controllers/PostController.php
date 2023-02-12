@@ -1,13 +1,23 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2013922
+ * This is the newscontroller of backend controller
+ */
+
 namespace backend\controllers;
 
+use yii\web\ForbiddenHttpException;
 use Yii;
 use common\models\Post;
 use common\models\PostSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+use common\models\LoginForm;
 
 /**
  * PostController implements the CRUD actions for Post model.
@@ -26,6 +36,22 @@ class PostController extends Controller
                     'delete' => ['POST'],
                 ],
             ],
+            'access' =>[
+                'class' => AccessControl::className(),
+                'rules' =>
+                [
+                        [
+                                'actions' => ['index', 'view'],
+                                'allow' => true,
+                                'roles' => ['?'],
+                        ],
+                [
+                'actions' => ['view', 'index', 'create','update','delete'],
+                'allow' => true,
+                'roles' => ['@'],
+                ],
+                ],
+            ],        
         ];
     }
 
@@ -64,6 +90,9 @@ class PostController extends Controller
      */
     public function actionCreate()
     {
+        if(!Yii::$app->user->can('createPost')) {
+            throw new ForbiddenHttpException('对不起，您没有进行该操作的权限');
+        }
         $model = new Post();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -84,6 +113,9 @@ class PostController extends Controller
      */
     public function actionUpdate($id)
     {
+        if(!Yii::$app->user->can('updatePost')) {
+            throw new ForbiddenHttpException('对不起，您没有进行该操作的权限');
+        }
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -104,6 +136,9 @@ class PostController extends Controller
      */
     public function actionDelete($id)
     {
+        if(!Yii::$app->user->can('deletePost')) {
+            throw new ForbiddenHttpException('对不起，您没有进行该操作的权限');
+        }
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -124,4 +159,5 @@ class PostController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
 }

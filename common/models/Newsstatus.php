@@ -1,5 +1,12 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2011431
+ * This is the newsstatus of common model
+ */
+
 namespace common\models;
 
 use Yii;

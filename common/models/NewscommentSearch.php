@@ -1,5 +1,12 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2013544
+ * This is the newscommentsearch of common model
+ */
+
 namespace common\models;
 
 use yii\base\Model;

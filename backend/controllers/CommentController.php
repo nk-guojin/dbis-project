@@ -1,7 +1,15 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2011431, 2012516
+ * This is the commentcontroller of backend controller
+ */
+
 namespace backend\controllers;
 
+use yii\web\ForbiddenHttpException;
 use Yii;
 use common\models\Comment;
 use common\models\CommentSearch;
@@ -123,5 +131,15 @@ class CommentController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionApprove($id)
+    {
+        if(!Yii::$app->user->can('approveComment')) {
+            throw new ForbiddenHttpException('对不起，您没有进行该操作的权限');
+        }
+    	$model = $this->findModel($id);
+        $model->approve();  //审核
+    	return $this->redirect(['index']);
     }
 }

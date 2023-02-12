@@ -1,13 +1,25 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2012516, 2013922
+ * This is the adminuser of backend controller
+ */
+
 namespace backend\controllers;
 
+use yii\web\ForbiddenHttpException;
 use Yii;
 use common\models\Adminuser;
 use common\models\AdminuserSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use backend\models\SignupForm;
+use backend\models\ResetpwdForm;
+use common\models\AuthItem;
+use common\models\AuthAssignment;
 
 /**
  * AdminuserController implements the CRUD actions for Adminuser model.
@@ -64,10 +76,13 @@ class AdminuserController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Adminuser();
+        $model = new SignupForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+           if($user = $model->signup())
+           {
+           		return $this->redirect(['view', 'id' => $user->id]);
+           }    	
         }
 
         return $this->render('create', [
@@ -88,11 +103,11 @@ class AdminuserController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
-        }
-
+        } else {
         return $this->render('update', [
             'model' => $model,
         ]);
+    }
     }
 
     /**
@@ -120,8 +135,81 @@ class AdminuserController extends Controller
     {
         if (($model = Adminuser::findOne($id)) !== null) {
             return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+    
+    public function actionResetpwd($id)
+    {
+    	$model = new ResetpwdForm();
+    
+    	if ($model->load(Yii::$app->request->post())) {
+    		
+    		if($model->resetPassword($id))
+    		{
+    			return $this->redirect(['index']);
+    		}
+    	}
+    	 
+    	return $this->render('resetpwd', [
+    			'model' => $model,
+    	]);
+    
     }
+    
+    public function actionPrivilege($id)
+    {
+        if(!Yii::$app->user->can('roleControl')) {
+            throw new ForbiddenHttpException('对不起，您没有进行该操作的权限');
+        }
+    	//step1. 找出所有权限,提供给checkboxlist
+    	$allPrivileges = AuthItem::find()->select(['name','description'])
+    	->where(['type'=>1])->orderBy('description')->all();
+    	 
+    	foreach ($allPrivileges as $pri)
+    	{
+    		$allPrivilegesArray[$pri->name]=$pri->description;
+    	}
+    	//step2. 当前用户的权限
+    	 
+    	$AuthAssignments=AuthAssignment::find()->select(['item_name'])
+    	->where(['user_id'=>$id])->orderBy('item_name')->all();
+    	 
+    	$AuthAssignmentsArray = array();
+    	 
+    	foreach ($AuthAssignments as $AuthAssignment)
+    	{
+    		array_push($AuthAssignmentsArray,$AuthAssignment->item_name);
+    	}
+    	 
+    	//step3. 从表单提交的数据,来更新AuthAssignment表,从而用户的角色发生变化
+    	if(isset($_POST['newPri']))
+    	{
+    		AuthAssignment::deleteAll('user_id=:id',[':id'=>$id]);
+    
+    		$newPri = $_POST['newPri'];
+    
+    		$arrlength = count($newPri);
+    
+    		for($x=0;$x<$arrlength;$x++)
+    		{
+    		$aPri = new AuthAssignment();
+    		$aPri->item_name = $newPri[$x];
+    		$aPri->user_id = $id;
+    		$aPri->created_at = time();
+    		 
+    		$aPri->save();
+    		}
+    		return $this->redirect(['index']);
+    	}
+    	 
+    	//step4. 渲染checkBoxList表单
+    
+    			return $this->render('privilege',['id'=>$id,'AuthAssignmentArray'=>$AuthAssignmentsArray,
+    			'allPrivilegesArray'=>$allPrivilegesArray]);
+       			 
+    }
+          
 }

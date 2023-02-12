@@ -1,5 +1,12 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2013544
+ * This is the commentsearch of common model
+ */
+
 namespace common\models;
 
 use yii\base\Model;
@@ -11,6 +18,9 @@ use common\models\Comment;
  */
 class CommentSearch extends Comment
 {
+    public function attributes(){
+        return array_merge(parent::attributes(), ['user.username','id']);
+    }
     /**
      * {@inheritdoc}
      */

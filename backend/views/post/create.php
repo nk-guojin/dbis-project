@@ -1,12 +1,19 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2013544
+ * This is the create of backend post
+ */
+
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Post */
 
-$this->title = 'Create Post';
-$this->params['breadcrumbs'][] = ['label' => 'Posts', 'url' => ['index']];
+$this->title = '创建博客';
+$this->params['breadcrumbs'][] = ['label' => '博客', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="post-create">

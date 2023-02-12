@@ -1,5 +1,12 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2012516
+ * This is the view of backend user
+ */
+
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

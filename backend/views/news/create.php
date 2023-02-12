@@ -1,12 +1,19 @@
 <?php
 
+
+/**
+ * Team: "小组"小组
+ * Coding by 2013544
+ * This is the create of backend news
+ */
+
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\News */
 
-$this->title = 'Create News';
-$this->params['breadcrumbs'][] = ['label' => 'News', 'url' => ['index']];
+$this->title = '创建新闻';
+$this->params['breadcrumbs'][] = ['label' => '新闻', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="news-create">
