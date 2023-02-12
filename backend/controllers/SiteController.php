@@ -76,13 +76,13 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack(); //登录成功，回到登录前的页面
+            return $this->goBack();
         } else {
             $model->password = '';
 
             return $this->render('login', [
                 'model' => $model,
-            ]); //登录失败，登录页展示错误，让用户填写正确的用户名和密码
+            ]);
         }
     }
 

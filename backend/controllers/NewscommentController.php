@@ -124,11 +124,4 @@ class NewscommentController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-
-    public function actionApprove($id)
-    {
-    	$model = $this->findModel($id);
-        $model->approve();  //审核
-    	return $this->redirect(['index']);
-    }
 }
