@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "news".
@@ -22,6 +23,8 @@ use Yii;
  */
 class News extends \yii\db\ActiveRecord
 {
+    private $_oldTags;
+
     /**
      * {@inheritdoc}
      */
@@ -51,14 +54,14 @@ class News extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'title' => 'Title',
-            'content' => 'Content',
-            'tags' => 'Tags',
-            'status' => 'Status',
-            'create_time' => 'Create Time',
-            'update_time' => 'Update Time',
-            'author_id' => 'Author ID',
+            'id' => '新闻ID',
+            'title' => '标题',
+            'content' => '内容',
+            'tags' => '标签',
+            'status' => '状态',
+            'create_time' => '创建时间',
+            'update_time' => '更新时间',
+            'author_id' => '作者',
         ];
     }
 
@@ -90,5 +93,92 @@ class News extends \yii\db\ActiveRecord
     public function getNewscomments()
     {
         return $this->hasMany(Newscomment::className(), ['post_id' => 'id']);
+    }
+
+    public function getActiveComments()
+    {
+    	return $this->hasMany(Newscomment::className(), ['post_id' => 'id'])
+    	->where('status=:status',[':status'=>2])->orderBy('id DESC');
+    }
+    
+    public function beforeSave($insert)
+    {
+    	if(parent::beforeSave($insert))
+    	{
+    		if($insert)
+    		{
+    			$this->create_time = time();
+    			$this->update_time = time();
+    		}
+    		else 
+    		{
+    			$this->update_time = time();
+    		}
+    		
+    		return true;
+    			
+    	}
+    	else 
+    	{
+    		return false;
+    	}
+    } 
+    
+    public function afterFind()
+    {
+    	parent::afterFind();
+    	$this->_oldTags = $this->tags;
+    }
+    
+    public function afterSave($insert, $changedAttributes)
+    {
+    	parent::afterSave($insert, $changedAttributes);
+    	Tag::updateFrequency($this->_oldTags, $this->tags);
+    }
+    
+    public function afterDelete()
+    {
+    	parent::afterDelete();
+    	Tag::updateFrequency($this->tags, '');
+    }
+    
+    public function getUrl()
+    {
+    	return Yii::$app->urlManager->createUrl(
+    			['news/detail','id'=>$this->id,'title'=>$this->title]);
+    }
+    
+    public function getBeginning($length=288)
+    {
+    	$tmpStr = strip_tags($this->content);
+    	$tmpLen = mb_strlen($tmpStr);
+    	 
+    	$tmpStr = mb_substr($tmpStr,0,$length,'utf-8');
+    	return $tmpStr.($tmpLen>$length?'...':'');
+    }
+    
+    public function  getTagLinks()
+    {
+    	$links=array();
+    	foreach(Tag::string2array($this->tags) as $tag)
+    	{
+    		$links[]=Html::a(Html::encode($tag),array('news/index','NewsSearch[tags]'=>$tag));
+    	}
+    	return $links;
+    }
+
+    public function getCommentCount()
+    {
+    	return Newscomment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
+    }
+
+    public function getNewsCommentCount()
+    {
+    	return Newscomment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
+    }
+
+    public static function primaryKey()
+    {
+        return ['id'];
     }
 }
