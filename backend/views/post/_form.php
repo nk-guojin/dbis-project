@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use common\models\Post;
+use common\models\Poststatus;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Post */
@@ -18,7 +20,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tags')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
+    <?= $form->field($model, 'status')->dropDownList(Poststatus::find()
+                                ->select(['name','id'])
+                                ->orderBy('position')
+                                ->indexBy('id')
+                                ->column(),
+                                ['prompt'=>'请选择状态']); ?>
 
     <?= $form->field($model, 'create_time')->textInput() ?>
 
@@ -30,6 +37,6 @@ use yii\widgets\ActiveForm;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+<?php ActiveForm::end(); ?>
 
 </div>

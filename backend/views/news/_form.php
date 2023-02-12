@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use common\models\News;
+use common\models\Newsstatus;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\News */
@@ -18,7 +20,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tags')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
+    <?= $form->field($model, 'status')->dropDownList(Newsstatus::find()
+                                    ->select(['name','id'])
+                                    ->orderBy('position')
+                                    ->indexBy('id')
+                                    ->column(),
+                                    ['prompt'=>'请选择状态']); ?>
 
     <?= $form->field($model, 'create_time')->textInput() ?>
 

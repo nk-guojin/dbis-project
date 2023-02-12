@@ -11,6 +11,9 @@ use common\models\Comment;
  */
 class CommentSearch extends Comment
 {
+    public function attributes(){
+        return array_merge(parent::attributes(), ['user.username','id']);
+    }
     /**
      * {@inheritdoc}
      */

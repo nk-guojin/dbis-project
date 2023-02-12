@@ -1,6 +1,6 @@
 <?php
 
-namespace backend\controllers;
+namespace frontend\controllers;
 
 use Yii;
 use common\models\News;
@@ -8,12 +8,20 @@ use common\models\NewsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+
+use common\models\Tag;
+use common\models\Newscomment;
+use common\models\User;
+use yii\rest\Serializer;
 
 /**
- * NewsrController implements the CRUD actions for News model.
+ * NewsController implements the CRUD actions for News model.
  */
-class NewsrController extends Controller
+class NewsController extends Controller
 {
+    public $added=0;
+    
     /**
      * {@inheritdoc}
      */
@@ -26,6 +34,45 @@ class NewsrController extends Controller
                     'delete' => ['POST'],
                 ],
             ],
+            'access' =>[
+                'class' => AccessControl::className(),
+                'rules' =>[
+                    ['actions' => ['index'],
+                        'allow' => true,
+                        'roles' => ['?'],],
+                    ['actions' => ['index', 'detail'],
+                        'allow' => true,
+                        'roles' => ['@'],],
+                ],
+            ],
+        
+            'pageCache'=>[
+                'class'=>'yii\filters\PageCache',
+                'only'=>['index'],
+                'duration'=>600,
+                'variations'=>[
+                    Yii::$app->request->get('page'),
+                    Yii::$app->request->get('NewsSearch'),
+                ],
+                'dependency'=>[
+                    'class'=>'yii\caching\DbDependency',
+                    'sql'=>'select count(id) from news',
+                ],
+            ],
+        
+            'httpCache'=>[
+                'class'=>'yii\filters\HttpCache',
+                'only'=>['detail'],
+                'lastModified'=>function ($action,$params){
+                    $q = new \yii\db\Query();
+                    return $q->from('news')->max('update_time');
+                },
+                'etagSeed'=>function ($action,$params) {
+                    $post = $this->findModel(Yii::$app->request->get('id'));
+                    return serialize([$post->title,$post->content]);
+                },
+            'cacheControlHeader' => 'public,max-age=600',
+            ],
         ];
     }
 
@@ -35,12 +82,17 @@ class NewsrController extends Controller
      */
     public function actionIndex()
     {
+        $tags=Tag::findTagWeights();
+    	$recentComments=Newscomment::findRecentComments();
+    	
         $searchModel = new NewsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'tags'=>$tags,
+        	'recentComments'=>$recentComments,
         ]);
     }
 
@@ -123,5 +175,39 @@ class NewsrController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionDetail($id)
+    {
+    	//step1. 准备数据模型   	
+    	$model = $this->findModel($id);
+    	$tags=Tag::findTagWeights();
+    	$recentComments=Newscomment::findRecentComments();
+    	
+    	$userMe = User::findOne(Yii::$app->user->id);
+    	$commentModel = new Newscomment();
+    	$commentModel->email = $userMe->email;
+    	$commentModel->userid = $userMe->id;
+    	
+    	//step2. 当评论提交时，处理评论
+    	if($commentModel->load(Yii::$app->request->post()))
+    	{
+    		$commentModel->status = 1; //新评论默认状态为 pending
+    		$commentModel->post_id = $id;
+    		if($commentModel->save())
+    		{
+    			$this->added=1;
+    		}
+    	}
+    	
+    	//step3.传数据给视图渲染
+    	
+    	return $this->render('detail',[
+    			'model'=>$model,
+    			'tags'=>$tags,
+    			'recentComments'=>$recentComments,
+    			'commentModel'=>$commentModel, 
+    			'added'=>$this->added, 			
+    	]);
     }
 }

@@ -92,4 +92,43 @@ class Newscomment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'userid']);
     }
+
+    public function getBeginning()
+    {
+    	$tmpStr = strip_tags($this->content);
+    	$tmpLen = mb_strlen($tmpStr);
+    	
+    	return mb_substr($tmpStr,0,10,'utf-8').(($tmpLen>10)?'...':'');
+    }
+    
+    public function approve()
+    {
+    	$this->status = 2; //设置评论状态为已审核
+    	return ($this->save()?true:false);
+    }
+    
+    public static function getPengdingCommentCount()
+    {
+    	return Newscomment::find()->where(['status'=>1])->count();
+    }
+    
+    public function beforeSave($insert)
+    {
+    	if(parent::beforeSave($insert))
+    	{
+    		if($insert)
+    		{
+    			$this->create_time=time();
+    		}
+    		return true;
+    	}
+    	else  return false;
+    }
+    
+    public static function findRecentComments($limit=10)
+    {
+    	return Newscomment::find()->where(['status'=>2])->orderBy('create_time DESC')
+    	->limit($limit)->all();
+    }   
+
 }

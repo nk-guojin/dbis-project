@@ -11,6 +11,10 @@ use common\models\News;
  */
 class NewsSearch extends News
 {
+    public function attributes()
+	{
+		return array_merge(parent::attributes(),['authorName']);
+	}
     /**
      * {@inheritdoc}
      */
@@ -43,6 +47,15 @@ class NewsSearch extends News
         $query = News::find();
 
         // add conditions that should always apply here
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        	'pagination' => ['pageSize'=>10],
+        	'sort'=>[
+        			'defaultOrder'=>[
+        					'id'=>SORT_DESC,        			
+        			],
+        	],
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,7 +70,7 @@ class NewsSearch extends News
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
+        /*$query->andFilterWhere([
             'id' => $this->id,
             'status' => $this->status,
             'create_time' => $this->create_time,
@@ -67,7 +80,30 @@ class NewsSearch extends News
 
         $query->andFilterWhere(['like', 'title', $this->title])
             ->andFilterWhere(['like', 'content', $this->content])
+            ->andFilterWhere(['like', 'tags', $this->tags]);*/
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            //'id' => $this->id,
+        	'news.id' => $this->id,
+            'status' => $this->status,
+            'create_time' => $this->create_time,
+            'update_time' => $this->update_time,
+            'author_id' => $this->author_id,
+        ]);
+
+        $query->andFilterWhere(['like', 'title', $this->title])
+            ->andFilterWhere(['like', 'content', $this->content])
             ->andFilterWhere(['like', 'tags', $this->tags]);
+
+        $query->join('INNER JOIN','Adminuser','news.author_id = Adminuser.id');
+        $query->andFilterWhere(['like','Adminuser.nickname',$this->authorName]);
+        
+        $dataProvider->sort->attributes['authorName'] = 
+        [
+        	'asc'=>['Adminuser.nickname'=>SORT_ASC],
+        	'desc'=>['Adminuser.nickname'=>SORT_DESC],
+        ];
 
         return $dataProvider;
     }
