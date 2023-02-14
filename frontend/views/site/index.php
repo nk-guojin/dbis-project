@@ -494,7 +494,10 @@ background-attachment: fixed;opacity:1">
             <div class="col-lg-4">
                 <h2><span class="bgr">小组作业链接<span></h2>
 
-                <a href="https://github.com/nk-guojin/dbis-project">小组作业的github仓库链接</a>
+                <p><a href="../../data/personal/作业(2011431_郭谨).rar" download="作业(2011431_郭谨).rar" >郭谨个人作业</span></a></p>
+                <p><a href="../../data/personal/作业(2012516_林雨豪).rar" download="作业(2012516_林雨豪).rar" >林雨豪个人作业</span></a></p>
+                <p><a href="../../data/personal/作业(2013922_赵一名).rar" download="作业(2013922赵一名).rar" >赵一名个人作业</span></a></p>
+                <p><a href="../../data/personal/作业(2013544_陈睿颖).rar" download="作业(2013544_陈睿颖).rar" >陈睿颖个人作业</span></a></p>
             </div>
         </div>
 
